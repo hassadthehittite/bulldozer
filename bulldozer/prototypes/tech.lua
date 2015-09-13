@@ -11,15 +11,14 @@ data:extend(
         recipe = "bulldozer"
       },
     },
-    prerequisites = {"tanks"},
+    prerequisites = {"automobilism"},
     unit =
     {
-      count = 450,
+      count = 150,
       ingredients =
       {
-        {"science-pack-1", 1},
-        {"science-pack-2", 1},
-        {"science-pack-3", 1}
+        {"science-pack-1", 2},
+        {"science-pack-2", 1}
       },
       time = 20
     },

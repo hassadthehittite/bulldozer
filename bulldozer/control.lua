@@ -6,7 +6,7 @@ require "GUI"
 
 
 
-remote.addinterface("bulldozer",{})
+remote.add_interface("bulldozer",{})
 
 defaultSettings = {
     collect = true
@@ -35,7 +35,7 @@ removeStone = true
         end
       end
     end
-    for i, bull in ipairs(glob.bull) do
+    for i, bull in ipairs(global.bull) do
       bull:collect(event)
       if bull.driver and bull.driver.name ~= "bull_player" then
         GUI.updateGui(bull)
@@ -44,7 +44,7 @@ removeStone = true
   end
   
   local function onGuiClick(event)
-    local index = event.playerindex or event.name
+    local index = event.player_index or event.name
     local player = game.players[index]
     if player.gui.left.bull ~= nil then
       local bull = BULL.findByPlayer(player)
@@ -57,96 +57,96 @@ removeStone = true
     end
   end
   
-  function onpreplayermineditem(event)
+  function on_preplayer_mined_item(event)
     local ent = event.entity
     local cname = ent.name
     if ent.type == "car" and cname == "bulldozer" then
-      for i=1,#glob.bull do
-        if glob.bull[i].vehicle.equals(ent) then
-          glob.bull[i].delete = true
+      for i=1,#global.bull do
+        if global.bull[i].vehicle == ent then
+          global.bull[i].delete = true
         end
       end
     end
   end
 
-  function onplayermineditem(event)
-    if event.itemstack.name == "bulldozer" then
-      for i=#glob.bull,1,-1 do
-        if glob.bull[i].delete then
-          table.remove(glob.bull, i)
+  function on_player_mined_item(event)
+    if event.item_stack.name == "bulldozer" then
+      for i=#global.bull,1,-1 do
+        if global.bull[i].delete then
+          table.remove(global.bull, i)
         end
       end
     end
   end
   
-  local function onplayercreated(event)
-    local player = game.getplayer(event.playerindex)
+  local function on_player_created(event)
+    local player = game.get_player(event.player_index)
     local gui = player.gui
     if gui.top.bull ~= nil then
       gui.top.bull.destroy()
     end
   end
 
-  game.onevent(defines.events.onplayercreated, onplayercreated)
+  game.on_event(defines.events.on_player_created, on_player_created)
   
   local function initGlob()
-    if glob.version == nill or glob.version < "0.0.1" then
-      glob = {}
-      glob.settings = {}
-      glob.version = "0.0.1"
+    if global.version == nil or global.version < "0.0.1" then
+      global = {}
+      global.settings = {}
+      global.version = "0.0.1"
     end
     if remote.interfaces["roadtrain"] then
       remote.call("roadtrain","settowbar","bulldozer",true)
       remote.call("roadtrain","settowbar","car",false)
     end
-    glob.players = glob.players or {}
-    glob.bull = glob.bull or {}
-    glob.players={}
+    global.players = global.players or {}
+    global.bull = global.bull or {}
+    global.players={}
     
-    if glob.version < "1.0.4" then
+    if global.version < "1.0.4" then
       for pi, player in pairs(game.players) do
         local settings = Settings.loadByPlayer(player)
         settings = resetMetatable(settings,Settings)
         settings:update(util.table.deepcopy(stg))
       end
     end
-    for i,bull in ipairs(glob.bull) do
+    for i,bull in ipairs(global.bull) do
       bull = resetMetatable(bull, BULL)
       bull.index = nil
     end
-    for name, s in pairs(glob.players) do
+    for name, s in pairs(global.players) do
       s = resetMetatable(s,Settings)
     end
-    glob.version = "1.0.4"
+    global.version = "1.0.4"
   end
   
-  local function oninit() initGlob() end
+  local function on_init() initGlob() end
 
-  local function onload()
+  local function on_load()
     initGlob()
   end
   
-  local function onentitydied(event)
+  local function on_entity_died(event)
     if event.entity.name == "bulldozer" then
-      for i=#glob.bull,1,-1 do
-        if event.entity.equals(glob.bull[i].vehicle) then
-          if glob.bull[i].driver then
-            local gui = glob.bull[i].driver.gui
+      for i=#global.bull,1,-1 do
+        if event.entity == global.bull[i].vehicle then
+          if global.bull[i].driver then
+            local gui = player.gui
             if gui.top.bull ~= nil then
               gui.top.bull.destroy()
             end
           end
-          table.remove(glob.bull, i)
+          table.remove(global.bull, i)
         end
       end
     end
   end
   
-  game.oninit(oninit)
-  game.onload(onload)
-  game.onevent(defines.events.ontick, onTick)
-  game.onevent(defines.events.onguiclick, onGuiClick)
-  game.onevent(defines.events.onplayermineditem, onplayermineditem)
-  game.onevent(defines.events.onpreplayermineditem, onpreplayermineditem)
-  game.onevent(defines.events.onbuiltentity, onbuiltentity)
-  game.onevent(defines.events.onentitydied, onentitydied)
+  game.on_init(on_init)
+  game.on_load(on_load)
+  game.on_event(defines.events.on_tick, onTick)
+  game.on_event(defines.events.on_gui_click, onGuiClick)
+  game.on_event(defines.events.on_player_mined_item, on_player_mined_item)
+  game.on_event(defines.events.on_preplayer_mined_item, on_preplayer_mined_item)
+  game.on_event(defines.events.on_built_entity, on_built_entity)
+  game.on_event(defines.events.on_entity_died, on_entity_died)

@@ -7,9 +7,10 @@ data:extend(
     energy_required = 15,
     ingredients =
     {
-	  {"tank", 1},
-      {"processing-unit", 2},
-      {"steel-plate",50},
+	  {"car", 1},
+      {"electronic-circuit", 10},
+      {"iron-gear-wheel", 20},
+      {"steel-plate",50}
     },
     result = "bulldozer"
   },

@@ -6,9 +6,9 @@ data:extend(
     icon = "__bulldozer__/graphics/icons/bulldozer.png",
     flags = {"pushable", "placeable-neutral", "player-creation"},
     minable = {mining_time = 1, result = "bulldozer"},
-    max_health = 2500,
+    max_health = 1500,
     corpse = "medium-remnants",
-    dying_explosion = "huge-explosion",
+    dying_explosion = "medium-explosion",
     energy_per_hit_point = 0.5,
     resistances =
     {
@@ -236,7 +236,7 @@ data:extend(
     close_sound = { filename = "__base__/sound/car-door-close.ogg", volume = 0.7 },
     rotation_speed = 0.0035,
     tank_driving = true,
-    weight = 20000,
+    weight = 5000,
     inventory_size = 80,
   },
 }

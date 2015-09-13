@@ -55,7 +55,8 @@ local blacklisttype = {
     ["rail-remnants"]=true, ["fish"]=true, car=true, locomotive=true, ["cargo-wagon"]=true, unit=true, tree=true,
     ["unit-spawner"]=true, player=true, decorative=true, resource=true, smoke=true, explosion=true,
     corpse=true, particle=true, ["flying-text"]=true, projectile=true, ["particle-source"]=true, turret=true,
-    sticker=true, ["logistic-robot"] = true, ["combat-robot"]=true, ["construction-robot"]=true, projectile=true, ["ghost"]=true
+    sticker=true, ["logistic-robot"] = true, ["combat-robot"]=true, ["construction-robot"]=true, projectile=true, ["ghost"]=true,
+    ["entity-ghost"]=true, ["leaf-particle"]=true
   }
   
   local blacklistname = {
@@ -76,15 +77,15 @@ BULL = {
   onPlayerEnter = function(player)
     local i = BULL.findByVehicle(player.vehicle)
     if i then
-      glob.bull[i].driver = player
-      glob.bull[i].settings = Settings.loadByPlayer(player)
+      global.bull[i].driver = player
+      global.bull[i].settings = Settings.loadByPlayer(player)
     else
-      table.insert(glob.bull, BULL.new(player))
+      table.insert(global.bull, BULL.new(player))
     end
   end,
 
   onPlayerLeave = function(player)
-    for i,f in ipairs(glob.bull) do
+    for i,f in ipairs(global.bull) do
       if f.driver and f.driver.name == player.name then
         f:deactivate()
         f.driver = false
@@ -95,8 +96,8 @@ BULL = {
   end,
 
   findByVehicle = function(bull)
-    for i,f in ipairs(glob.bull) do
-      if f.vehicle.equals(bull) then
+    for i,f in ipairs(global.bull) do
+      if f.vehicle == bull then
         return i
       end
     end
@@ -104,8 +105,8 @@ BULL = {
   end,
 
   findByPlayer = function(player)
-    for i,f in ipairs(glob.bull) do
-      if f.vehicle.equals(player.vehicle) then
+    for i,f in ipairs(global.bull) do
+      if f.vehicle == player.vehicle then
         f.driver = player
         return f
       end
@@ -123,7 +124,7 @@ BULL = {
     
     --self:fillWater(area)
     
-    for _, entity in ipairs(game.findentitiesfiltered{area = area, type = "tree"}) do
+    for _, entity in ipairs(game.get_surface(1).find_entities_filtered{area = area, type = "tree"}) do
       if self.settings.collect then
         if self:addItemToCargo("raw-wood", 1) then
           entity.die()
@@ -138,14 +139,14 @@ BULL = {
       self:pickupItems(pos, area)
     end
     self:blockprojectiles(pos,area)
-    for _, entity in ipairs(game.findentities{{area[1][1],area[1][2]},{area[2][1],area[2][2]}}) do
+    for _, entity in ipairs(game.get_surface(1).find_entities{{area[1][1],area[1][2]},{area[2][1],area[2][2]}}) do
       if not blacklisttype[entity.type] and not blacklistname[entity.name] then
         if self.settings.collect then
           for i=1,4,1 do
             --game.player.print(i)
-            local success, inv = pcall(function(e,i) return e.getinventory(i) end, entity,i)
+            local success, inv = pcall(function(e,i) return e.get_inventory(i) end, entity,i)
             if success then
-              for k,v in pairs(inv.getcontents()) do
+              for k,v in pairs(inv.get_contents()) do
                 if self:addItemToCargo(k,v) then
                   self:removeItemFromTarget(entity,k,v,i)
                  else
@@ -167,7 +168,7 @@ BULL = {
     end
    
     if removeStone then
-      for _, entity in ipairs(game.findentitiesfiltered{area = area, name = "stone-rock"}) do
+      for _, entity in ipairs(game.get_surface(1).find_entities_filtered{area = area, name = "stone-rock"}) do
         if self.settings.collect then
           if self:addItemToCargo("stone", 5) then
             entity.die()
@@ -183,13 +184,13 @@ BULL = {
   
       
   blockprojectiles = function(self,pos, area)
-    for _, entity in ipairs(game.findentitiesfiltered{area = area, name="acid-projectile-purple"}) do
+    for _, entity in ipairs(game.get_surface(1).find_entities_filtered{area = area, name="acid-projectile-purple"}) do
       entity.destroy()
     end
   end,
 
   pickupItems = function(self,pos, area)
-    for _, entity in ipairs(game.findentitiesfiltered{area = area, name="item-on-ground"}) do
+    for _, entity in ipairs(game.get_surface(1).find_entities_filtered{area = area, name="item-on-ground"}) do
       if self:addItemToCargo(entity.stack.name, entity.stack.count) then
         entity.destroy()
       else
@@ -207,7 +208,7 @@ BULL = {
             table.insert(tiles,{name="sand", position={x, y}})
           end
         end
-        game.settiles(tiles) 
+        game.set_tiles(tiles) 
   end,
 
   activate = function(self)
@@ -239,8 +240,8 @@ BULL = {
         return true
       end
     end
-    if entity.getinventory(2).caninsert({name = item, count = count}) then
-      entity.getinventory(2).insert({name = item, count = count})
+    if entity.get_inventory(2).can_insert({name = item, count = count}) then
+      entity.get_inventory(2).insert({name = item, count = count})
       return true
     end
     return false
@@ -248,7 +249,7 @@ BULL = {
   
   removeItemFromTarget = function(self,entity,item,count,inv)
     local count = count or 1
-    entity.getinventory(inv).remove({name = item, count = count})
+    entity.get_inventory(inv).remove({name = item, count = count})
   end,
   
   print = function(self, msg)
@@ -263,7 +264,7 @@ BULL = {
     if show then
       local pos = pos or addPos(self.vehicle.position, {x=0,y=-1})
       color = color or RED
-      game.createentity({name="flying-text", position=pos, text=line, color=color})
+      game.get_surface(1).create_entity({name="flying-text", position=pos, text=line, color=color})
     end
   end,
   

@@ -15,12 +15,13 @@ Settings = {
       name = "noname"
     end
     local settings = util.table.deepcopy(defaultSettings)
-    if not glob.players[name] then
-      glob.players[name] = settings
+    if not global.players[name] then
+      global.players[name] = settings
     end
-    glob.players[name].player = player
-    setmetatable(glob.players[name], Settings)
-    return glob.players[name]
+    game.player.print(name)
+    global.players[name].player = player
+    setmetatable(global.players[name], Settings)
+    return global.players[name]
   end,
   
   update = function(self, key, value)
